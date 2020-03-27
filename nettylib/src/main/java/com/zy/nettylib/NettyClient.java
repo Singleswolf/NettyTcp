@@ -2,23 +2,15 @@ package com.zy.nettylib;
 
 import android.util.Log;
 
-import java.nio.charset.StandardCharsets;
+import com.zy.nettylib.handler.TCPChannelInitializerHandler;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
@@ -48,19 +40,9 @@ public class NettyClient {
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000 * 10)
                 .handler(new LoggingHandler(LogLevel.INFO))
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) {
-                        //指定分隔符 "\0"
-                        ByteBuf delimiter = Unpooled.copiedBuffer(Constants.DELIMITER.getBytes(StandardCharsets.UTF_8));
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast("framer", new DelimiterBasedFrameDecoder(1024 * 1024, delimiter));
-                        pipeline.addLast("decoder", new StringDecoder());
-                        pipeline.addLast("encoder", new StringEncoder());
-                        pipeline.addLast("handler", new NettyClientHandler());
-                    }
-                });
+                .handler(new TCPChannelInitializerHandler());
         //发起异步连接操作
         bootstrap.connect(host, port).addListener(new ChannelFutureListener() {
             @Override
