@@ -1,6 +1,7 @@
-package com.zy.nettylib.handler;
+package com.zy.nettylib.client.handler;
 
-import com.zy.nettylib.Constants;
+import com.zy.nettylib.client.Constants;
+import com.zy.nettylib.client.NettyClient;
 
 import java.nio.charset.StandardCharsets;
 
@@ -17,6 +18,12 @@ import io.netty.handler.codec.string.StringEncoder;
  * @author: Created by yong on 2020/3/27 21:12.
  */
 public class TCPChannelInitializerHandler extends ChannelInitializer<SocketChannel> {
+    private final NettyClient client;
+
+    public TCPChannelInitializerHandler(NettyClient nettyClient) {
+        this.client = nettyClient;
+    }
+
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         //指定分隔符 "\0"
@@ -25,6 +32,8 @@ public class TCPChannelInitializerHandler extends ChannelInitializer<SocketChann
         pipeline.addLast("framer", new DelimiterBasedFrameDecoder(1024 * 1024, delimiter));
         pipeline.addLast("decoder", new StringDecoder());
         pipeline.addLast("encoder", new StringEncoder());
-        pipeline.addLast("handler", new NettyClientHandler());
+        // 心跳消息响应处理handler
+        pipeline.addLast(HeartbeatRespHandler.class.getSimpleName(), new HeartbeatRespHandler(client));
+        pipeline.addLast(ClientReadHandler.class.getSimpleName(), new ClientReadHandler(client));
     }
 }

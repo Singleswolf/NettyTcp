@@ -1,4 +1,4 @@
-package com.zy.nettylib.listener;
+package com.zy.nettylib.client.listener;
 
 public interface ConnectStatusCallback {
     /**
@@ -9,7 +9,7 @@ public interface ConnectStatusCallback {
     /**
      * 连接成功
      */
-    void onConnected();
+    void onConnected(String host, int port);
 
     /**
      * 连接失败
