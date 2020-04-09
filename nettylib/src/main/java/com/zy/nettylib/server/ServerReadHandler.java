@@ -15,6 +15,7 @@ class ServerReadHandler extends ChannelInboundHandlerAdapter {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         Log.d(TAG, "channelActive: " + ctx.channel().remoteAddress());
+        ChannelContainer.getInstance().saveChannel(ctx.channel());
     }
 
     @Override

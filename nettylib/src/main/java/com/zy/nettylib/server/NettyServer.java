@@ -26,8 +26,19 @@ import io.netty.handler.codec.string.StringEncoder;
  */
 public class NettyServer {
 
+    private static NettyServer instance;
     private ServerBootstrap mBootstrap;
     private final String TAG = "NettyServer";
+
+    private NettyServer() {
+    }
+
+    public static NettyServer getInstance() {
+        if (instance == null) {
+            instance = new NettyServer();
+        }
+        return instance;
+    }
 
     public void startServer(int bindPort) {
         //boss线程监听端口，worker线程负责数据读写

@@ -1,6 +1,7 @@
 package com.zy.nettytcp;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 
@@ -9,6 +10,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.zy.nettylib.client.NettyClient;
 import com.zy.nettylib.client.listener.ConnectStatusCallback;
 import com.zy.nettylib.client.listener.OnResponseListener;
+import com.zy.nettylib.server.ChannelContainer;
+import com.zy.nettylib.server.NettyServer;
+
+import java.util.Map;
+
+import io.netty.channel.Channel;
 
 public class MainActivity extends AppCompatActivity implements ConnectStatusCallback, OnResponseListener {
 
@@ -39,6 +46,33 @@ public class MainActivity extends AppCompatActivity implements ConnectStatusCall
         String data2 = "{\"version\":\"1.0\",\"type\":\"rsync_person_req\",\"sn\":\"30:09:F9:11:20:B1\",\"seq\":1,\"data\":{\"person_type\":0,\"person_id\":\"620\"}}";
         Log.d(TAG, "sendData: " + data2);
         NettyClient.getInstance().sendData(data2);
+    }
+
+    public void startServer(View view) {
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                NettyServer.getInstance().startServer(8888);
+            }
+        }.start();
+        new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                Map<String, Channel> channels = ChannelContainer.getInstance().getChannels();
+                while (true){
+                    for (Map.Entry<String, Channel> entry : channels.entrySet()) {
+                        entry.getValue().writeAndFlush("{\"code\":0,\"data\":{\"night_pic_index\":0,\"temperature\":0,\"day_pic_index\":0},\"msg\":\"成功\",\"seq\":1,\"type\":\"heart_beat_rsp\",\"version\":\"1.0\"}\0");
+                    }
+                    SystemClock.sleep(5000);
+                }
+            }
+        }.start();
+    }
+
+    public void closeServer(View view) {
+        NettyServer.getInstance().close();
     }
 
     @Override

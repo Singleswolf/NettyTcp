@@ -38,4 +38,8 @@ public class ChannelContainer {
             CHANNELS.remove(channelId);
         }
     }
+
+    public Map<String, Channel> getChannels() {
+        return CHANNELS;
+    }
 }
